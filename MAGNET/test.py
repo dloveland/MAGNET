@@ -168,8 +168,6 @@ class Tester():
     
      
         return objective
-        
-
 
     def test_wb(self, objective=True):
 
@@ -203,37 +201,10 @@ class Tester():
                 output, _ = self.get_feasible(output, data)
                 label_y = data.orig_label.numpy()
 
-                if objective:
-                    opt_val_predicted = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), output)
-                    opt_val_gt = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), label_y)
-                    val_perf.append(objective)
-                else: 
-                    hid_rep = output.flatten()
-                    data_y = label_y.flatten()
-                    N = len(hid_rep)
-                    TP = 0
-                    FP = 0 
-                    FN = 0
-                    for h in range(N):
-                        if hid_rep[h] == 0 and data_y[h] == 0:
-                            continue
-                        else:
-                            max_amnt = int(np.max((hid_rep[h], data_y[h])))
-                            pred = np.zeros(max_amnt)
-                            pred[:int(hid_rep[h])] = 1
-                            gt = np.zeros(max_amnt)
-                            gt[:int(data_y[h])] = 1
-                            
-                            TP += ((pred == 1) & (gt == 1)).sum()
-                            FP += ((pred == 1) & (gt == 0)).sum()
-                            FN += ((pred == 0) & (gt == 1)).sum()
-                    precision = TP / (TP + FP)
-                    recall = TP / (TP + FN)
-                    if TP == 0:
-                        f1_score = 0
-                    else: 
-                        f1_score = (2*precision*recall)/(precision+recall)
-                    val_perf.append(f1_score)
+                opt_val_predicted = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), output)
+                opt_val_gt = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), label_y)
+                val_perf.append(objective)
+                
           
         for data in self.test_loader:
             num_graphs = len(data.v_len)
@@ -262,47 +233,16 @@ class Tester():
                 time_diff = (time.time() - start_time) + data.time.item()
                 label_y = data.orig_label.numpy()
 
-                if objective:
-                    opt_val_predicted = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), output)
-                    opt_val_gt = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), label_y)
-                    test_perf.append(opt_val_predicted)
-                    test_gt_perf.append(opt_val_gt)
-                else: 
-                    hid_rep = output.flatten()
-                    data_y = label_y.flatten()
-                    N = len(hid_rep)
-                    TP = 0
-                    FP = 0 
-                    FN = 0
-                    for h in range(N):
-                        if hid_rep[h] == 0 and data_y[h] == 0:
-                            continue
-                        else:
-                            max_amnt = int(np.max((hid_rep[h], data_y[h])))
-                            pred = np.zeros(max_amnt)
-                            pred[:int(hid_rep[h])] = 1
-                            gt = np.zeros(max_amnt)
-                            gt[:int(data_y[h])] = 1
-                            
-                            TP += ((pred == 1) & (gt == 1)).sum()
-                            FP += ((pred == 1) & (gt == 0)).sum()
-                            FN += ((pred == 0) & (gt == 1)).sum()
-
-                    precision = TP / (TP + FP)
-                    recall = TP / (TP + FN)
-                    if TP == 0:
-                        f1_score = 0
-                    else: 
-                        f1_score = (2*precision*recall)/(precision+recall)
-                    
-                    test_perf.append(f1_score)
+                opt_val_predicted = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), output)
+                opt_val_gt = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), label_y)
+                test_perf.append(opt_val_predicted)
+                test_gt_perf.append(opt_val_gt)
+                
                 test_gap.append(gaps.item())
                 test_runtime.append(time_diff)
                
-        if objective: 
-            return val_perf, test_perf, test_gap, test_runtime, test_gt_perf
-        else:
-            return val_perf, test_perf, test_gap, test_runtime
+        return val_perf, test_perf, test_gap, test_runtime, test_gt_perf
+
 
     def test_line_graph(self,  objective=True):
 
@@ -320,44 +260,10 @@ class Tester():
             output, _ = self.get_feasible(hid_rep, data)
             label_y = data.orig_label.numpy()
             
-            if objective:
-                #print(data.optimal_val)
-                opt_val_predicted = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), output)
-                opt_val_gt = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), label_y)
-                val_perf.append(opt_val_predicted)
-
-
-                #print(opt_val_predicted)
-                #print(opt_val_gt)
-            else: 
-                hid_rep = hid_rep.flatten()
-                data_y = label_y.flatten()
-                N = len(hid_rep)
-                TP = 0
-                FP = 0 
-                FN = 0
-                for h in range(N):
-                    if hid_rep[h] == 0 and data_y[h] == 0:
-                        continue
-                    else:
-                        max_amnt = int(np.max((hid_rep[h], data_y[h])))
-                        pred = np.zeros(max_amnt)
-                        pred[:int(hid_rep[h])] = 1
-                        gt = np.zeros(max_amnt)
-                        gt[:int(data_y[h])] = 1
-                        
-                        TP += ((pred == 1) & (gt == 1)).sum()
-                        FP += ((pred == 1) & (gt == 0)).sum()
-                        FN += ((pred == 0) & (gt == 1)).sum()
-                precision = TP / (TP + FP)
-                recall = TP / (TP + FN)
-                if TP == 0:
-                    f1_score = 0
-                else: 
-                    f1_score = (2*precision*recall)/(precision+recall)
-                    
-                val_perf.append(f1_score)
-
+            opt_val_predicted = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), output)
+            opt_val_gt = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), label_y)
+            val_perf.append(opt_val_predicted)
+            
         for d, data in enumerate(self.test_loader):
             start_time = time.time()
 
@@ -371,49 +277,17 @@ class Tester():
             
             time_diff = (time.time() - start_time) + data.time.item()
 
-            if objective:
-                opt_val_predicted = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), output)
-                opt_val_gt = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), label_y)
-                #print(opt_val_predicted)
-                #print(opt_val_gt)
-                test_perf.append(opt_val_predicted)
-                test_gt_perf.append(opt_val_gt)
-            else: 
-                hid_rep = hid_rep.flatten()
-                data_y = label_y.flatten()
-                N = len(hid_rep)
-                TP = 0
-                FP = 0 
-                FN = 0
-                for h in range(N):
-                    if hid_rep[h] == 0 and data_y[h] == 0:
-                        continue
-                    else:
-                        max_amnt = int(np.max((hid_rep[h], data_y[h])))
-                        pred = np.zeros(max_amnt)
-                        pred[:int(hid_rep[h])] = 1
-                        gt = np.zeros(max_amnt)
-                        gt[:int(data_y[h])] = 1
-                        
-                        TP += ((pred == 1) & (gt == 1)).sum()
-                        FP += ((pred == 1) & (gt == 0)).sum()
-                        FN += ((pred == 0) & (gt == 1)).sum()
-
-                precision = TP / (TP + FP)
-                recall = TP / (TP + FN)
-                if TP == 0:
-                    f1_score = 0
-                else: 
-                    f1_score = (2*precision*recall)/(precision+recall)
-            
-                test_perf.append(f1_score)
+            opt_val_predicted = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), output)
+            opt_val_gt = self.get_opt_value(data.v.detach().numpy(), data.prob_matrix.detach().numpy(), label_y)
+            #print(opt_val_predicted)
+            #print(opt_val_gt)
+            test_perf.append(opt_val_predicted)
+            test_gt_perf.append(opt_val_gt)
+           
             test_gap.append(gaps.item())
             test_runtime.append(time_diff)
         
-        if objective: 
-            return val_perf, test_perf, test_gap, test_runtime, test_gt_perf
-        else:
-            return val_perf, test_perf, test_gap, test_runtime
+        return val_perf, test_perf, test_gap, test_runtime, test_gt_perf
 
 
 
@@ -422,241 +296,143 @@ class Tester():
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser("milp")
-    #parser.add_argument("--path", type=str, default='gnn_pyg/data/generate/assignment_data/data_2023-10-03_23-34-13.hdf5', help="Full path for the data to be saved to.")
-    #parser.add_argument("--path", type=str, default="gnn_pyg/data/generate/assignment_data/data_2023-10-04_17-09-04.hdf5", help="Full path for the data to be saved to.")
-    parser.add_argument("--data_path", type=str, default="gnn_pyg/data/generate/assignment_data/data_2023-10-07_18-48-05.hdf5", help="Full path for the data to be saved to.")
-    
+    parser.add_argument("--data_path", type=str, help="Full path to load data from")
+    parser.add_argument("--model_path", type=str, help="Full path to load model from")
     parser.add_argument("--seed", type=int, default=123, help='seed to use for various random components of code, such as data shuffling')
-
     parser.add_argument("--model", type=str, default='GLAN',  help='GNN model to use')
     parser.add_argument('--nhids', type=int, default=64, help='hidden dim for GNN model')
     parser.add_argument('--depths', type=int, default=8, help='depth of GNN model')
     parser.add_argument('--dropout', type=float, default=0.3, help='dropout probability')
     parser.add_argument('--node_to_assignment_func', type=str, default='na', choices=['na', 'outer_product', 'matmul', 'concat_mlp'], help='method to converting learned node representations into final assignment matrix')
-
     parser.add_argument('--lrs', type=float, default=0.0001, help='learning rate')
     parser.add_argument('--regularize_l1s', type=float, default=0.5)
 
     args = parser.parse_args()
-    
-    objective = True
-
+    prune = False 
     reprs = ['line_graph', 'weighted_bipartite']
-    paths = ['gnn_pyg/data/generate/assignment_data/data_2023-10-03_23-34-13.hdf5', "gnn_pyg/data/generate/assignment_data/data_2023-10-04_17-09-04.hdf5"]
-    path_name = [p.split('/')[-1].rstrip('.hdf5') for p in paths] 
-    # different experiments 
+    path_name = args.model_path.split('/')[-1].rstrip('.hdf5') 
+
     test_dict = {}
 
-    for p, path in enumerate(paths): 
-        args.path = path
-        if p >= 0:
-            args.data_path = path
-            test_data = False
-        else:
-            test_data = True
-        for representation in reprs: 
-            args.repr = representation
+    for representation in reprs: 
+        args.repr = representation
 
-            if args.repr == 'line_graph':
-                prune = False
+        dataset = WTA(args.data_path, repr=args.repr)
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # Get with no idx gives all graphs 
+        data = dataset.get(device=device)
+        data_size = len(data)
+        model_name = args.model_path.split('/')[-1].rstrip('.hdf5')
+        
+        # if probabilistic, use expansions
+        args.use_P = data[0].use_P
+        args.use_C = data[0].use_C   
+
+        nhids = [16, 32]
+        depths = [2, 3]
+        dropout = 0.3
+        lrs = [0.001, 0.0001]
+        models = ['GCNII', 'GCN', 'FAGCN', 'GPRGNN', 'GLAN']
+
+        for model_type in models:
+            if model_type == 'GLAN':
+                if args.repr == 'line_graph':
+                    continue 
+                node_to_assignment_funcs = ['na']
+                regs = [0.0]
+                nout = 1
             else:
-                prune = False
-
-            dataset = WTA(args.data_path, repr=args.repr)
-            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-            # Get with no idx gives all graphs 
-            data = dataset.get(device=device)
-            data_size = len(data)
-            dataset_name = args.path.split('/')[-1].rstrip('.hdf5')
-            
-            # if probabilistic, use expansions
-            args.use_P = data[0].use_P
-            args.use_C = data[0].use_C   
-
-            nhids = [16, 32]
-            depths = [2, 3]
-            dropout = 0.3
-            lrs = [0.001, 0.0001]
-            models = ['GCNII', 'GCN', 'FAGCN', 'GPRGNN', 'GLAN']
-
-            for model_type in models:
-                print(model_type)
-                if model_type == 'GLAN':
-                    if args.repr == 'line_graph':
-                        continue 
+                regs = [0.0, 0.5]
+                if args.repr == 'line_graph':
                     node_to_assignment_funcs = ['na']
-                    regs = [0.0]
                     nout = 1
                 else:
-                    regs = [0.0, 0.5]
-                    if args.repr == 'line_graph':
-                        node_to_assignment_funcs = ['na']
-                        nout = 1
-                    else:
-                        node_to_assignment_funcs = ['matmul', 'concat_mlp']
-                        nout = 16
+                    node_to_assignment_funcs = ['matmul', 'concat_mlp']
+                    nout = 16
 
-                for node_to_assignment_func in node_to_assignment_funcs:
-                    args.model = model_type
-                    args.node_to_assignment_func = node_to_assignment_func
-        
-                    
-                    if args.repr == 'line_graph':
-                        save_folder = 'gnn_pyg/models_results/{4}/{0}_{1}_{2}_{3}/'.format('wta', args.model, args.repr, args.seed, dataset_name)
-                    else:
-                        save_folder = 'gnn_pyg/models_results/{4}/{0}_{1}_{2}_{5}_{3}/'.format('wta', args.model, args.repr, args.seed, dataset_name, args.node_to_assignment_func)
+            for node_to_assignment_func in node_to_assignment_funcs:
+                args.model = model_type
+                args.node_to_assignment_func = node_to_assignment_func
+    
+                
+                if args.repr == 'line_graph':
+                    save_folder = 'gnn_pyg/models_results/{4}/{0}_{1}_{2}_{3}/'.format('wta', args.model, args.repr, args.seed, model_name)
+                else:
+                    save_folder = 'gnn_pyg/models_results/{4}/{0}_{1}_{2}_{5}_{3}/'.format('wta', args.model, args.repr, args.seed, model_name, args.node_to_assignment_func)
 
-                    random.seed(args.seed)
-                    # Get data loader which batches elements
+                random.seed(args.seed)
+                random.shuffle(data)
 
-                    random.shuffle(data)
+                train_cutoff = round(0.8 * data_size)
+                val_cutoff = round(0.9 * data_size)
 
-                    if test_data:
-                        val_cutoff = round(0.8 * data_size)
-                        val_loader = DataLoader(data[:val_cutoff], batch_size=1, shuffle=True)
-                        test_loader = DataLoader(data[val_cutoff:], batch_size=1, shuffle=True)
-                        print('this')
-                    else: 
-                        train_cutoff = round(0.8 * data_size)
-                        val_cutoff = round(0.9 * data_size)
+                # get same val and test data
+                train_loader = DataLoader(data[:train_cutoff], batch_size=1, shuffle=True)
+                val_loader = DataLoader(data[train_cutoff:val_cutoff], batch_size=1, shuffle=True)
+                test_loader = DataLoader(data[val_cutoff:], batch_size=1, shuffle=True)
+                
+                # get model with best val and save test loss 
+                best_val_perf = 0
 
-                        # get same val and test data
-                        train_loader = DataLoader(data[:train_cutoff], batch_size=1, shuffle=True)
-                        val_loader = DataLoader(data[train_cutoff:val_cutoff], batch_size=1, shuffle=True)
-                        test_loader = DataLoader(data[val_cutoff:], batch_size=1, shuffle=True)
-                    
-                    # get model with best val and save test loss 
-                    best_val_perf = 0
+                for nhid in nhids:
+                    for depth in depths: 
+                        for lr in lrs: 
+                            for reg in regs:
+                            # get model
+                                if args.model == 'GCN':
+                                    model = GCN(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, act='relu', args=args)
+                                elif args.model == 'GCNII':
+                                    model = GCNII(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, alpha=0.1, act='relu', args=args)
+                                elif args.model == 'GPRGNN':
+                                    model = GPRGNN(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, K=10, alpha=0.1, act='relu', args=args)
+                                elif args.model == 'FAGCN':
+                                    model = FAGCN(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, eps=0.1, act='relu', args=args)
+                                elif args.model == 'GLAN':
+                                    model = GLAN(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, act='relu', args=args)
+                                    
 
-                    for nhid in nhids:
-                        for depth in depths: 
-                            for lr in lrs: 
-                                for reg in regs:
-                                # get model
-                                    if args.model == 'GCN':
-                                        model = GCN(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, act='relu', args=args)
-                                    elif args.model == 'GCNII':
-                                        model = GCNII(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, alpha=0.1, act='relu', args=args)
-                                    elif args.model == 'GPRGNN':
-                                        model = GPRGNN(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, K=10, alpha=0.1, act='relu', args=args)
-                                    elif args.model == 'FAGCN':
-                                        model = FAGCN(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, eps=0.1, act='relu', args=args)
-                                    elif args.model == 'GLAN':
-                                        model = GLAN(data[0].x.shape[1], nhid, nout, depth=depth, dropout=dropout, act='relu', args=args)
-                                        
+                                model_checkpoint_path = save_folder + 'nhid_{0}_depth_{1}_nout_{2}_lr_{3}_reg_{4}.pth'.format(nhid, depth, nout, lr, reg)
+                                model.load_state_dict(torch.load(model_checkpoint_path)['model'])
+                                model.eval()
 
-                                    model_checkpoint_path = save_folder + 'nhid_{0}_depth_{1}_nout_{2}_lr_{3}_reg_{4}.pth'.format(nhid, depth, nout, lr, reg)
-                                    model.load_state_dict(torch.load(model_checkpoint_path)['model'])
-                                    model.eval()
-
-                                    if args.repr == 'weighted_bipartite':
-                                        tester = Tester(model, val_loader, test_loader, args, node_to_assignment_func=args.node_to_assignment_func, checkpoint_path=model_checkpoint_path, nout=nout, nhid=nhid, depth=depth)
-                                        if objective: 
-                                            val_perf, test_perf, test_gap, test_runtime, test_perf_gt = tester.test_wb(objective=objective)
-                                        else: 
-                                            val_perf, test_perf, test_gap, test_runtime = tester.test_wb(objective=objective)
-                                    else:
-                                        tester = Tester(model, val_loader, test_loader, args, checkpoint_path=model_checkpoint_path, nout=nout, nhid=nhid, depth=depth, prune=prune)
-                                        if objective:
-                                            val_perf, test_perf, test_gap, test_runtime, test_perf_gt = tester.test_line_graph(objective=objective)
-                                        else: 
-                                            val_perf, test_perf, test_gap, test_runtime = tester.test_line_graph(objective=objective)
-
-                                    #print(val_perf)
-                                    avg_val_perf = sum(val_perf)/len(val_perf)
-                                    #print(avg_val_perf)
-                                    if avg_val_perf >= best_val_perf:
-                                        #print(test_perf_gt)
-                                        #print(test_perf)
-                                        best_val_perf = avg_val_perf
-                                        best_test_perf = sum(test_perf)/len(test_perf)
-                                        best_test_gap = sum(test_gap)/len(test_gap)
-                                        best_test_runtime = sum(test_runtime)/len(test_runtime)
-                                        best_runtime_std = np.std(test_runtime)
-                                        if objective: 
-                                            optimality_gaps = (np.array(test_perf_gt) - np.array(test_perf))/np.array(test_perf_gt) 
-                                            #print(optimality_gaps)
-                                            
-                                            best_optimality_gap = sum(optimality_gaps)/len(optimality_gaps)
-                                            best_opt_std = np.std(optimality_gaps)
-                                            #print(best_optimality_gap)
-                    
-                    if objective:
-                        best_test_perf = best_optimality_gap
-                        best_opt_std = best_opt_std
-                        #print(best_test_perf)
-                    if args.repr == 'line_graph':
-                        test_dict['linegraph' + '_' + model_type + '_' + node_to_assignment_func + '_' + path.split('/')[-1].rstrip('.hdf5')] = (round(best_test_perf, 2), \
-                                                                                                                                            round(best_opt_std, 2), \
-                                                                                                                                            round(best_test_gap, 2), \
-                                                                                                                                            round(best_test_runtime,4), \
-                                                                                                                                            round(best_runtime_std,4))
-                    else: 
-                        if node_to_assignment_func == 'concat_mlp':
-                            node_to_assignment_func_name = 'concatmlp'
-                        else:
-                            node_to_assignment_func_name = node_to_assignment_func
-                        test_dict['weightedbipartite' + '_' + model_type + '_' + node_to_assignment_func_name + '_' + path.split('/')[-1].rstrip('.hdf5')] = (round(best_test_perf, 2), \
-                                                                                                                                            round(best_opt_std, 2), \
-                                                                                                                                            round(best_test_gap, 2), \
-                                                                                                                                            round(best_test_runtime,4), \
-                                                                                                                                            round(best_runtime_std,4))
-
+                                if args.repr == 'weighted_bipartite':
+                                    tester = Tester(model, val_loader, test_loader, args, node_to_assignment_func=args.node_to_assignment_func, checkpoint_path=model_checkpoint_path, nout=nout, nhid=nhid, depth=depth)
+                                    val_perf, test_perf, test_gap, test_runtime, test_perf_gt = tester.test_wb()
+                                else:
+                                    tester = Tester(model, val_loader, test_loader, args, checkpoint_path=model_checkpoint_path, nout=nout, nhid=nhid, depth=depth, prune=prune)
+                                    val_perf, test_perf, test_gap, test_runtime, test_perf_gt = tester.test_line_graph()
             
 
 
-    #print(test_dict)
+                                avg_val_perf = sum(val_perf)/len(val_perf)
 
+                                if avg_val_perf >= best_val_perf:
+                                    best_val_perf = avg_val_perf
+                                    best_test_perf = sum(test_perf)/len(test_perf)
+                                    best_test_gap = sum(test_gap)/len(test_gap)
+                                    best_test_runtime = sum(test_runtime)/len(test_runtime)
+                                    best_runtime_std = np.std(test_runtime)
+                                    
+                                    optimality_gaps = (np.array(test_perf_gt) - np.array(test_perf))/np.array(test_perf_gt) 
+                                    best_optimality_gap = sum(optimality_gaps)/len(optimality_gaps)
+                                    best_opt_std = np.std(optimality_gaps)
                 
-    for method in ['matmul', 'concatmlp', 'GLAN', 'line']:
-        sub_test_dict = {key: value for (key, value) in test_dict.items() if method in key}
-        if method != 'GLAN':
-            for model in ['_GCN_', 'GCNII', 'FAGCN', 'GPRGNN']:
-                sub_model_test_dict = {key: value for (key, value) in sub_test_dict.items() if model in key}
-                
-                sub_model_data_test_dict_p0 = {key: value for (key, value) in sub_model_test_dict.items() if path_name[0] in key}
-                sub_model_data_test_dict_p1 = {key: value for (key, value) in sub_model_test_dict.items() if path_name[1] in key}
-                # only one key here
-                values_p0 = list(sub_model_data_test_dict_p0.values())[0]
-                values_p1 = list(sub_model_data_test_dict_p1.values())[0]
 
-                key = list(sub_model_data_test_dict_p0.keys())[0]
+                if args.repr == 'line_graph':
+                    test_dict['linegraph' + '_' + model_type + '_' + node_to_assignment_func + '_' + path.split('/')[-1].rstrip('.hdf5')] = (round(best_optimality_gap, 2), \
+                                                                                                                                        round(best_opt_std, 2), \
+                                                                                                                                        round(best_test_gap, 2), \
+                                                                                                                                        round(best_test_runtime,4), \
+                                                                                                                                        round(best_runtime_std,4))
+                else: 
+                    if node_to_assignment_func == 'concat_mlp':
+                        node_to_assignment_func_name = 'concatmlp'
+                    else:
+                        node_to_assignment_func_name = node_to_assignment_func
+                    test_dict['weightedbipartite' + '_' + model_type + '_' + node_to_assignment_func_name + '_' + path.split('/')[-1].rstrip('.hdf5')] = (round(best_optimality_gap, 2), \
+                                                                                                                                        round(best_opt_std, 2), \
+                                                                                                                                        round(best_test_gap, 2), \
+                                                                                                                                        round(best_test_runtime,4), \
+                                                                                                                                        round(best_runtime_std,4))
 
-                repres, model_name, assign, _, _, _ = key.split('_')
-                if assign == 'matmul':
-                    model_aggr = 'Node2Vec'
-                elif assign == 'concatmlp':
-                    model_aggr = 'Edge2Vec'
-                # na case 
-                else:
-                    model_aggr = 'Line'
-                
-                if model == '_GCN_':
-                    model_name = 'GCN'
-                else:
-                    model_name = model 
-
-
-                if method == 'line':
-                    prnt_str = r'{0}-{1} & - & \checkmark & ${2} \pm {3}$ & ${4} \pm {5}$ & ${6} \pm {7}$ & ${8} \pm {9}$ \\ '.format(model_name, model_aggr, values_p0[0], values_p0[1], values_p0[3], values_p0[4], \
-                                                                                                                              values_p1[0], values_p1[1], values_p1[3], values_p1[4])
-                else:
-                    prnt_str = r'{0}-{1} & \checkmark & - & ${2} \pm {3}$ & ${4} \pm {5}$ & ${6} \pm {7}$ & ${8} \pm {9}$ \\ '.format(model_name, model_aggr, values_p0[0], values_p0[1], values_p0[3], values_p0[4], \
-                                                                                                                              values_p1[0], values_p1[1], values_p1[3], values_p1[4])
-                if model == 'GPRGNN':
-                    prnt_str += ' \hline'
-                print(prnt_str)
-
-        else: 
-            #print(sub_test_dict)
-            sub_model_data_test_dict_p0 = {key: value for (key, value) in sub_test_dict.items() if path_name[0] in key}
-            sub_model_data_test_dict_p1 = {key: value for (key, value) in sub_test_dict.items() if path_name[1] in key}
-            # only one key here
-            values_p0 = list(sub_model_data_test_dict_p0.values())[0]
-            values_p1 = list(sub_model_data_test_dict_p1.values())[0]
-
-            key = list(sub_model_data_test_dict_p0.keys())[0]
-
-            repres, model_name, assign, _, _, _ = key.split('_')
-            print(r'{0} & \checkmark & - & ${2} \pm {3}$ & ${4} \pm {5}$ & ${6} \pm {7}$ & ${8} \pm {9}$ \\ \hline '.format(model_name, '_', values_p0[0], values_p0[1], values_p0[3], values_p0[4], \
-                                                                                                                    values_p1[0], values_p1[1], values_p1[3], values_p1[4]))
+        
