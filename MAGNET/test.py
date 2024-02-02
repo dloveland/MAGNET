@@ -8,7 +8,7 @@ from pathlib import Path
 import h5py
 import numpy as np
 import networkx as nx
-from MAGNET.data_gen.dataloaders import WTA
+from MAGNET.data_gen.dataloaders import PygDataset
 from MAGNET.models.gnns import *
 import argparse 
 from torch import optim, nn, utils, Tensor, tensor
