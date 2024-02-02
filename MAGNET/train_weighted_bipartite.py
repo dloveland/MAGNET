@@ -8,13 +8,12 @@ from pathlib import Path
 import h5py
 import numpy as np
 import networkx as nx
-from gnn_pyg.data.dataloaders import WTA
-from gnn_pyg.models.gnns import *
+from MAGNET.data_gen.dataloaders import PygDataset
+from MAGNET.models.gnns import *
 import argparse 
 from torch import optim, nn, utils, Tensor, tensor
 from tqdm import tqdm
 import os 
-os.environ['OPENBLAS_NUM_THREADS'] = '1'
 from torch_geometric.loader import DataLoader
 import random
 import sys
@@ -114,7 +113,7 @@ class Trainer():
         # determine which duplicated nodes are not needed and remove them from backpropogation 
         return torch.where(data_y.sum(dim=0) != 0.0)[0]
         
-    def train_wta(self):
+    def train(self):
 
         train_losses = []
         val_losses = []
@@ -192,8 +191,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser("milp")
 
-    parser.add_argument('--data_type', type=str, default='wta', choices=['wta'], help='data type to generate, changes shape of output')
-    parser.add_argument("--path", type=str, default="gnn_pyg/data/generate/lp_data/data_06-07-2023_15-30-20.hdf5", help="Full path for the data to be saved to.")
+    parser.add_argument('--data_type', type=str, help='data type to generate, changes shape of output')
+    parser.add_argument("--path", type=str, help="Full path for the data to be saved to.")
     parser.add_argument("--seed", type=int, default=123, help='seed to use for various random components of code, such as data shuffling')
 
     parser.add_argument("--model", type=str, default='GCN',  help='GNN model to use')
@@ -222,7 +221,7 @@ if __name__ == '__main__':
     args.repr = 'weighted_bipartite'
 
     # Load in dataset 
-    dataset = WTA(args.path, repr=args.repr)
+    dataset = PygDataset(args.path, repr=args.repr)
     # Get with no idx gives all graphs 
     data = dataset.get(device=device)
 
@@ -241,13 +240,9 @@ if __name__ == '__main__':
        print('If using outer product, can only have 1D vector output')
        sys.exit()
 
-    save_folder = 'gnn_pyg/models_results/{0}/{1}_{2}_{3}_{4}_{5}/'.format(dataset_name, 'wta', args.model, 'weighted_bipartite', args.node_to_assignment_func, args.seed)
+    save_folder = 'MAGNET/models_results/{0}/{1}_{2}_{3}_{4}_{5}/'.format(dataset_name, 'wta', args.model, 'weighted_bipartite', args.node_to_assignment_func, args.seed)
 
     os.makedirs(save_folder, exist_ok=True)
-
-    if os.path.isfile(save_folder + 'nhid_{0}_depth_{1}_nout_{2}_lr_{3}_reg_{4}.pth'.format(args.nhid, args.depth, args.nout, args.lr, args.regularize_l1)):
-        print("Already processed")
-        sys.exit()
 
     # Get data loader which batches elements
     data_size = len(data)
