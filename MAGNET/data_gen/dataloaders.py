@@ -23,7 +23,7 @@ import tqdm
 import time
 torch.set_printoptions(threshold=1000, edgeitems=4)
 
-class WTA(Dataset):
+class PygDataset(Dataset):
 
     def __init__(self, 
         filename, 
@@ -290,7 +290,7 @@ class WTA(Dataset):
 
 if __name__ == "__main__":
 
-    wta_dataset = WTA('generate/assignment_data2023-10-03_19-51-20.hdf5', repr='line_graph')
+    wta_dataset = PygDataset('generate/assignment_data2023-10-03_19-51-20.hdf5', repr='line_graph')
     data = wta_dataset.get()
 
     
