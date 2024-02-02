@@ -9,7 +9,6 @@ import h5py
 import numpy as np
 import networkx as nx
 from ast import literal_eval
-# from ..util import binarize
 import sys
 if sys.flags.debug:
     import pdb
@@ -18,10 +17,8 @@ import matplotlib.pyplot as plt
 import torch_geometric.transforms as T
 from torch_geometric.transforms import line_graph
 from torch_geometric.utils import coalesce
-np.set_printoptions(threshold=sys.maxsize)
 import tqdm
 import time
-torch.set_printoptions(threshold=1000, edgeitems=4)
 
 class PygDataset(Dataset):
 
@@ -277,20 +274,11 @@ class PygDataset(Dataset):
             return (self.get(ii) for ii in self.data_subset)
 
     def __del__(self):
-        # Close the HDF5 file
-        # Seems as though the HDF5 is already closed by time del is called 
         try: 
             self._file.close()
         except:
             pass
 
 
-
-
-
-if __name__ == "__main__":
-
-    wta_dataset = PygDataset('generate/assignment_data2023-10-03_19-51-20.hdf5', repr='line_graph')
-    data = wta_dataset.get()
 
     
