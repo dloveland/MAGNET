@@ -8,8 +8,8 @@ from pathlib import Path
 import h5py
 import numpy as np
 import networkx as nx
-from gnn_pyg.data.dataloaders import WTA
-from gnn_pyg.models.gnns import *
+from MAGNET.data_gen.dataloaders import WTA
+from MAGNET.models.gnns import *
 import argparse 
 from torch import optim, nn, utils, Tensor, tensor
 from tqdm import tqdm
@@ -317,7 +317,7 @@ if __name__ == '__main__':
     for representation in reprs: 
         args.repr = representation
 
-        dataset = WTA(args.data_path, repr=args.repr)
+        dataset = PygDataset(args.data_path, repr=args.repr)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         # Get with no idx gives all graphs 
         data = dataset.get(device=device)
@@ -356,9 +356,9 @@ if __name__ == '__main__':
     
                 
                 if args.repr == 'line_graph':
-                    save_folder = 'gnn_pyg/models_results/{4}/{0}_{1}_{2}_{3}/'.format('wta', args.model, args.repr, args.seed, model_name)
+                    save_folder = 'MAGNET/models_results/{4}/{0}_{1}_{2}_{3}/'.format('wta', args.model, args.repr, args.seed, model_name)
                 else:
-                    save_folder = 'gnn_pyg/models_results/{4}/{0}_{1}_{2}_{5}_{3}/'.format('wta', args.model, args.repr, args.seed, model_name, args.node_to_assignment_func)
+                    save_folder = 'MAGNET/models_results/{4}/{0}_{1}_{2}_{5}_{3}/'.format('wta', args.model, args.repr, args.seed, model_name, args.node_to_assignment_func)
 
                 random.seed(args.seed)
                 random.shuffle(data)
