@@ -1,5 +1,5 @@
 # MAGNET
-Base implementation for MAGNET
+Base implementation for MAGNET - TO UPDATE
 
 ## Data Generation
 Data generation found in 'data_gen/gen_task.py' which will allow a user to generate and solve problems (using MOSEK) according Equation 1 in paper.
